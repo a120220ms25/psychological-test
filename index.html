@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>心理測驗 × 互動故事</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 開始畫面 -->
+        <div id="startScreen" class="screen active">
+            <h1 class="title">心理測驗</h1>
+            <p class="subtitle">揭開你的內心世界</p>
+            <button class="btn-start" onclick="startGame()">開始測驗</button>
+            <button class="btn-achievements" onclick="showAchievements()">成就列表</button>
+        </div>
+
+        <!-- 遊戲畫面 -->
+        <div id="gameScreen" class="screen">
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+
+            <div class="question-number" id="questionNumber">1 / 30</div>
+
+            <div class="question-card">
+                <div class="question-tone" id="questionTone"></div>
+                <h2 class="question-text" id="questionText"></h2>
+            </div>
+
+            <div class="options-container" id="optionsContainer"></div>
+        </div>
+
+        <!-- 結果畫面 -->
+        <div id="resultScreen" class="screen">
+            <div class="result-card">
+                <h3 class="result-title">心理分析</h3>
+                <p class="result-personality" id="resultPersonality"></p>
+                <div class="result-percentage" id="resultPercentage"></div>
+                <p class="result-description" id="resultDescription"></p>
+            </div>
+        </div>
+
+        <!-- 成就畫面 -->
+        <div id="achievementScreen" class="screen">
+            <div class="achievement-header">
+                <h2>成就列表</h2>
+                <button class="btn-close" onclick="hideAchievements()">✕</button>
+            </div>
+            <div class="achievements-list" id="achievementsList"></div>
+            <div class="share-buttons">
+                <button class="btn-share btn-ig" onclick="shareToIG()">分享到 IG 限動</button>
+                <button class="btn-share btn-line" onclick="shareToLine()">分享到 LINE</button>
+            </div>
+        </div>
+
+        <!-- 成就彈窗 -->
+        <div id="achievementPopup" class="achievement-popup">
+            <div class="popup-content">
+                <div class="popup-icon">🏆</div>
+                <h3 id="popupTitle"></h3>
+                <p id="popupDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
