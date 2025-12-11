@@ -74,7 +74,15 @@ function showQuestion() {
     const question = questions[currentQuestionIndex];
 
     document.getElementById('qcounter').textContent = `${answeredCount + 1} / ∞`;
-    document.getElementById('questionText').textContent = question.question;
+
+    const questionText = document.getElementById('questionText');
+    questionText.style.transition = 'all 0.3s ease';
+    questionText.style.opacity = '0';
+
+    setTimeout(() => {
+        questionText.textContent = question.question;
+        questionText.style.opacity = '1';
+    }, 100);
 
     const toneBadge = document.getElementById('toneBadge');
     toneBadge.className = 'tone-badge tone-' + question.tone;
@@ -147,6 +155,9 @@ function selectOption(index) {
     buttons.forEach(btn => btn.disabled = true);
     buttons[index].classList.add('selected');
 
+    // 顯示快速反饋
+    showQuickFeedback(selectedOption);
+
     if (question.tone === 'dark') userStats.darkChoices++;
     if (question.tone === 'love') userStats.loveChoices++;
     if (question.tone === 'funny') userStats.funnyChoices++;
@@ -171,9 +182,26 @@ function selectOption(index) {
 
     checkAchievements();
 
+    // 直接進入下一題，不顯示結果畫面
     setTimeout(() => {
-        showResult(selectedOption);
-    }, 500);
+        nextQuestion();
+    }, 800);
+}
+
+function showQuickFeedback(option) {
+    // 在題目文字區域顯示快速反饋
+    const questionText = document.getElementById('questionText');
+
+    questionText.style.transition = 'all 0.3s ease';
+    questionText.style.opacity = '0';
+
+    setTimeout(() => {
+        questionText.innerHTML = `<div style="text-align:center">
+            <div style="font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">${option.personality}</div>
+            <div style="font-size:48px;font-weight:900">${option.percentage}%</div>
+        </div>`;
+        questionText.style.opacity = '1';
+    }, 300);
 }
 
 function showResult(option) {
@@ -230,8 +258,6 @@ function getRandomDescription(percentage) {
 }
 
 function nextQuestion() {
-    showView('gameView');
-
     answeredCount++;
     currentQuestionIndex++;
 
