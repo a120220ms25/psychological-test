@@ -7,61 +7,88 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- 開始畫面 -->
-        <div id="startScreen" class="screen active">
-            <h1 class="title">心理測驗</h1>
-            <p class="subtitle">揭開你的內心世界</p>
-            <button class="btn-start" onclick="startGame()">開始測驗</button>
-            <button class="btn-achievements" onclick="showAchievements()">成就列表</button>
+    <div class="app">
+        <div class="topbar">
+            <div class="brand">心理測驗</div>
+            <div class="controls">
+                <button class="btn small" onclick="showAchievements()">🏆</button>
+            </div>
+        </div>
+
+        <!-- 首頁 -->
+        <div id="homeView" class="view">
+            <div class="card hero">
+                <h1>揭開你的內心世界</h1>
+                <p>透過心理測驗，探索你不為人知的一面</p>
+                <div class="home-actions">
+                    <button class="btn primary" onclick="startGame()">開始測驗</button>
+                    <button class="btn" onclick="showAchievements()">成就列表</button>
+                </div>
+                <div class="meta">
+                    <span class="pill">📊 50+ 題目</span>
+                    <span class="pill">🎯 即時分析</span>
+                    <span class="pill">🏆 15 成就</span>
+                </div>
+                <div id="achievementsPreview" class="achievements-preview"></div>
+            </div>
         </div>
 
         <!-- 遊戲畫面 -->
-        <div id="gameScreen" class="screen">
-            <div class="progress-container">
-                <div id="progressBar" class="progress-bar"></div>
+        <div id="gameView" class="view hide">
+            <div class="card">
+                <div id="progressWrap">
+                    <div id="timerBar">
+                        <div id="timerFill"></div>
+                    </div>
+                    <div id="qcounter">1 / ∞</div>
+                </div>
+
+                <div id="scene">
+                    <div id="toneBadge" class="tone-badge"></div>
+                    <div id="questionText"></div>
+                    <div class="options" id="optionsContainer"></div>
+                </div>
             </div>
-
-            <div class="question-number" id="questionNumber">1 / 30</div>
-
-            <div class="question-card">
-                <div class="question-tone" id="questionTone"></div>
-                <h2 class="question-text" id="questionText"></h2>
-            </div>
-
-            <div class="options-container" id="optionsContainer"></div>
         </div>
 
         <!-- 結果畫面 -->
-        <div id="resultScreen" class="screen">
-            <div class="result-card">
-                <h3 class="result-title">心理分析</h3>
-                <p class="result-personality" id="resultPersonality"></p>
-                <div class="result-percentage" id="resultPercentage"></div>
-                <p class="result-description" id="resultDescription"></p>
+        <div id="resultView" class="view hide">
+            <div class="card" id="resultCard">
+                <h3>心理分析</h3>
+                <div id="resultPersonality"></div>
+                <div id="resultPercentage"></div>
+                <div id="resultDescription"></div>
+                <div id="resultBadges"></div>
+                <div class="result-actions">
+                    <button class="btn primary" onclick="nextQuestion()">下一題</button>
+                </div>
             </div>
         </div>
 
         <!-- 成就畫面 -->
-        <div id="achievementScreen" class="screen">
-            <div class="achievement-header">
-                <h2>成就列表</h2>
-                <button class="btn-close" onclick="hideAchievements()">✕</button>
-            </div>
-            <div class="achievements-list" id="achievementsList"></div>
-            <div class="share-buttons">
-                <button class="btn-share btn-ig" onclick="shareToIG()">分享到 IG 限動</button>
-                <button class="btn-share btn-line" onclick="shareToLine()">分享到 LINE</button>
+        <div id="achievementView" class="view hide">
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                    <h2 style="font-size:24px;font-weight:800">成就列表</h2>
+                    <button class="btn small" onclick="hideAchievements()">✕</button>
+                </div>
+                <div id="achievementsList"></div>
+                <div class="share-buttons">
+                    <button class="btn-share btn-ig" onclick="shareToIG()">IG 限動</button>
+                    <button class="btn-share btn-line" onclick="shareToLine()">LINE</button>
+                </div>
             </div>
         </div>
 
         <!-- 成就彈窗 -->
         <div id="achievementPopup" class="achievement-popup">
-            <div class="popup-content">
-                <div class="popup-icon">🏆</div>
-                <h3 id="popupTitle"></h3>
-                <p id="popupDescription"></p>
-            </div>
+            <div class="popup-icon">🏆</div>
+            <h3 id="popupTitle"></h3>
+            <p id="popupDescription"></p>
+        </div>
+
+        <div class="footer">
+            Made with 💖 · 探索你的內心世界
         </div>
     </div>
 

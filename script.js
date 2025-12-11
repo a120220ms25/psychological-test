@@ -14,14 +14,49 @@ let userStats = {
     lastOptionIndex: -1,
     totalAnswers: 0,
     quickAnswers: 0,
-    timeoutAnswers: 0
+    timeoutAnswers: 0,
+    consecutiveCorrect: 0,
+    highScoreStreak: 0
 };
 
 let unlockedAchievements = JSON.parse(localStorage.getItem('achievements')) || [];
 
+// 初始化
+window.addEventListener('DOMContentLoaded', () => {
+    updateAchievementsPreview();
+});
+
+function updateAchievementsPreview() {
+    const preview = document.getElementById('achievementsPreview');
+    if (!preview) return;
+
+    preview.innerHTML = '';
+    const unlocked = unlockedAchievements.slice(0, 5);
+    unlocked.forEach(id => {
+        const ach = achievements.find(a => a.id === id);
+        if (ach) {
+            const pill = document.createElement('span');
+            pill.className = 'ach-pill';
+            pill.textContent = ach.icon + ' ' + ach.title;
+            preview.appendChild(pill);
+        }
+    });
+}
+
+function hideAll() {
+    document.getElementById('homeView').classList.add('hide');
+    document.getElementById('gameView').classList.add('hide');
+    document.getElementById('resultView').classList.add('hide');
+    document.getElementById('achievementView').classList.add('hide');
+}
+
+function showView(viewId) {
+    hideAll();
+    document.getElementById(viewId).classList.remove('hide');
+}
+
 function startGame() {
-    document.getElementById('startScreen').classList.remove('active');
-    document.getElementById('gameScreen').classList.add('active');
+    showView('gameView');
     currentQuestionIndex = 0;
     answeredCount = 0;
     shuffleQuestions();
@@ -38,13 +73,13 @@ function shuffleQuestions() {
 function showQuestion() {
     const question = questions[currentQuestionIndex];
 
-    document.getElementById('questionNumber').textContent = `${answeredCount + 1} / ∞`;
+    document.getElementById('qcounter').textContent = `${answeredCount + 1} / ∞`;
     document.getElementById('questionText').textContent = question.question;
 
-    const toneElement = document.getElementById('questionTone');
-    toneElement.className = 'question-tone tone-' + question.tone;
+    const toneBadge = document.getElementById('toneBadge');
+    toneBadge.className = 'tone-badge tone-' + question.tone;
     const toneLabels = { funny: '😂 搞笑', love: '💕 戀愛', dark: '🌑 暗黑' };
-    toneElement.textContent = toneLabels[question.tone];
+    toneBadge.textContent = toneLabels[question.tone];
 
     const optionsContainer = document.getElementById('optionsContainer');
     optionsContainer.innerHTML = '';
@@ -62,8 +97,8 @@ function showQuestion() {
 
 function startProgressTimer() {
     progressWidth = 100;
-    const progressBar = document.getElementById('progressBar');
-    progressBar.style.width = '100%';
+    const progressFill = document.getElementById('timerFill');
+    progressFill.style.width = '100%';
 
     clearInterval(progressTimer);
 
@@ -79,7 +114,7 @@ function startProgressTimer() {
             autoSelectOption();
         } else {
             progressWidth = (remaining / duration) * 100;
-            progressBar.style.width = progressWidth + '%';
+            progressFill.style.width = progressWidth + '%';
         }
     }, 10);
 }
@@ -116,7 +151,13 @@ function selectOption(index) {
     if (question.tone === 'love') userStats.loveChoices++;
     if (question.tone === 'funny') userStats.funnyChoices++;
 
-    if (selectedOption.percentage >= 90) userStats.perfectScores++;
+    if (selectedOption.percentage >= 90) {
+        userStats.perfectScores++;
+        userStats.highScoreStreak++;
+    } else {
+        userStats.highScoreStreak = 0;
+    }
+
     if (selectedOption.percentage <= 20) userStats.lowScores++;
 
     if (index === userStats.lastOptionIndex) {
@@ -136,16 +177,20 @@ function selectOption(index) {
 }
 
 function showResult(option) {
-    document.getElementById('gameScreen').classList.remove('active');
-    document.getElementById('resultScreen').classList.add('active');
+    showView('resultView');
 
     document.getElementById('resultPersonality').textContent = option.personality;
-    document.getElementById('resultPercentage').textContent = option.percentage;
+    document.getElementById('resultPercentage').textContent = option.percentage + '%';
     document.getElementById('resultDescription').textContent = getRandomDescription(option.percentage);
 
-    setTimeout(() => {
-        nextQuestion();
-    }, 2500);
+    // 顯示徽章
+    const badges = document.getElementById('resultBadges');
+    badges.innerHTML = '';
+    if (option.percentage >= 90) {
+        badges.innerHTML = '<span class="ach-pill">🔥 完美!</span>';
+    } else if (option.percentage >= 70) {
+        badges.innerHTML = '<span class="ach-pill">✨ 很準!</span>';
+    }
 }
 
 function getRandomDescription(percentage) {
@@ -154,19 +199,25 @@ function getRandomDescription(percentage) {
             '你的直覺準到可怕，建議去買樂透',
             '這個選擇完美詮釋了你的內心',
             '恭喜你，成功暴露了真實的自己',
-            '你的潛意識正在對你微笑'
+            '你的潛意識正在對你微笑',
+            '這就是你內心最真實的聲音',
+            '你對自己的了解程度：滿分'
         ],
         medium: [
             '還不錯，但你內心還有更多秘密',
             '你正在通往自我認識的路上',
             '這個答案透露了一些你的小心思',
-            '你的選擇很有意思呢'
+            '你的選擇很有意思呢',
+            '你在逃避什麼嗎？',
+            '有點意思，繼續探索吧'
         ],
         low: [
             '你可能需要重新認識一下自己',
             '這個選擇...很特別',
             '你的潛意識可能在開玩笑',
-            '有時候逃避也是一種選擇'
+            '有時候逃避也是一種選擇',
+            '勇氣可嘉，但方向好像不太對',
+            '你是不是隨便選的？'
         ]
     };
 
@@ -179,8 +230,7 @@ function getRandomDescription(percentage) {
 }
 
 function nextQuestion() {
-    document.getElementById('resultScreen').classList.remove('active');
-    document.getElementById('gameScreen').classList.add('active');
+    showView('gameView');
 
     answeredCount++;
     currentQuestionIndex++;
@@ -194,8 +244,7 @@ function nextQuestion() {
 }
 
 function showAchievements() {
-    document.getElementById('startScreen').classList.remove('active');
-    document.getElementById('achievementScreen').classList.add('active');
+    showView('achievementView');
 
     const list = document.getElementById('achievementsList');
     list.innerHTML = '';
@@ -209,10 +258,10 @@ function showAchievements() {
         }
 
         item.innerHTML = `
-            <div class="achievement-icon">${achievement.icon}</div>
-            <div class="achievement-info">
-                <div class="achievement-title">${achievement.title}</div>
-                <div class="achievement-description">${achievement.description}</div>
+            <div class="icon">${achievement.icon}</div>
+            <div class="info">
+                <div class="title">${achievement.title}</div>
+                <div class="desc">${achievement.description}</div>
             </div>
         `;
 
@@ -221,8 +270,7 @@ function showAchievements() {
 }
 
 function hideAchievements() {
-    document.getElementById('achievementScreen').classList.remove('active');
-    document.getElementById('startScreen').classList.add('active');
+    showView('homeView');
 }
 
 function checkAchievements() {
@@ -262,12 +310,28 @@ function checkAchievements() {
             case 'lazy_king_10':
                 if (userStats.timeoutAnswers >= 10) unlocked = true;
                 break;
+            case 'streaker_5':
+                if (userStats.highScoreStreak >= 5) unlocked = true;
+                break;
+            case 'master_100':
+                if (userStats.totalAnswers >= 100) unlocked = true;
+                break;
+            case 'all_dark_20':
+                if (userStats.darkChoices >= 20) unlocked = true;
+                break;
+            case 'all_love_25':
+                if (userStats.loveChoices >= 25) unlocked = true;
+                break;
+            case 'all_funny_25':
+                if (userStats.funnyChoices >= 25) unlocked = true;
+                break;
         }
 
         if (unlocked) {
             unlockedAchievements.push(achievement.id);
             localStorage.setItem('achievements', JSON.stringify(unlockedAchievements));
             showAchievementPopup(achievement);
+            updateAchievementsPreview();
         }
     });
 }

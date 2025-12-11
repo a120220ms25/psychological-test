@@ -308,6 +308,216 @@ const questions = [
             { text: "不覺得孤獨", personality: "獨行俠", percentage: 54 }
         ],
         tone: "dark"
+    },
+    {
+        question: "如果可以穿越時空，你想見誰？",
+        options: [
+            { text: "過世的親人", personality: "念舊之人", percentage: 77 },
+            { text: "歷史名人", personality: "知識追求者", percentage: 64 },
+            { text: "小時候的自己", personality: "自我療癒者", percentage: 91 },
+            { text: "未來的自己", personality: "焦慮規劃師", percentage: 58 }
+        ],
+        tone: "funny"
+    },
+    {
+        question: "你的理想伴侶特質是？",
+        options: [
+            { text: "有錢", personality: "實際主義者", percentage: 67 },
+            { text: "帥/美", personality: "顏控", percentage: 55 },
+            { text: "聊得來", personality: "靈魂知己派", percentage: 92 },
+            { text: "聽話", personality: "控制慾強者", percentage: 43 }
+        ],
+        tone: "love"
+    },
+    {
+        question: "半夜聽到奇怪聲音，你會？",
+        options: [
+            { text: "躲在被子裡", personality: "膽小鬼", percentage: 74 },
+            { text: "拿武器查看", personality: "勇士", percentage: 81 },
+            { text: "裝睡", personality: "逃避專家", percentage: 66 },
+            { text: "報警", personality: "求救王", percentage: 52 }
+        ],
+        tone: "dark"
+    },
+    {
+        question: "你最想改變自己的什麼？",
+        options: [
+            { text: "外表", personality: "外貌焦慮者", percentage: 69 },
+            { text: "個性", personality: "自我否定者", percentage: 78 },
+            { text: "能力", personality: "上進青年", percentage: 85 },
+            { text: "都不想改", personality: "自我接納者", percentage: 93 }
+        ],
+        tone: "funny"
+    },
+    {
+        question: "如果另一半說要分手，你會？",
+        options: [
+            { text: "問原因", personality: "理性派", percentage: 76 },
+            { text: "哭著挽留", personality: "感性派", percentage: 62 },
+            { text: "立刻答應", personality: "自尊至上", percentage: 84 },
+            { text: "威脅報復", personality: "瘋批預備軍", percentage: 48 }
+        ],
+        tone: "love"
+    },
+    {
+        question: "你覺得人活著最重要的是？",
+        options: [
+            { text: "快樂", personality: "享樂主義", percentage: 88 },
+            { text: "成功", personality: "野心家", percentage: 71 },
+            { text: "被愛", personality: "缺愛患者", percentage: 65 },
+            { text: "自由", personality: "靈魂自由者", percentage: 79 }
+        ],
+        tone: "dark"
+    },
+    {
+        question: "朋友跟你借錢不還，你會？",
+        options: [
+            { text: "直接討", personality: "直率派", percentage: 82 },
+            { text: "暗示提醒", personality: "委婉派", percentage: 67 },
+            { text: "算了", personality: "好人卡收集者", percentage: 54 },
+            { text: "絕交", personality: "原則至上", percentage: 73 }
+        ],
+        tone: "funny"
+    },
+    {
+        question: "你最想對前任說什麼？",
+        options: [
+            { text: "謝謝你", personality: "感恩之人", percentage: 76 },
+            { text: "去死", personality: "怨念深重", percentage: 58 },
+            { text: "我還愛你", personality: "放不下星人", percentage: 69 },
+            { text: "什麼都不說", personality: "釋懷者", percentage: 91 }
+        ],
+        tone: "love"
+    },
+    {
+        question: "如果可以詛咒一個人，你會選？",
+        options: [
+            { text: "傷害過我的人", personality: "復仇者", percentage: 83 },
+            { text: "討厭的同事", personality: "職場黑化", percentage: 71 },
+            { text: "前任的新歡", personality: "嫉妒魔人", percentage: 64 },
+            { text: "不想詛咒人", personality: "善良天使", percentage: 47 }
+        ],
+        tone: "dark"
+    },
+    {
+        question: "你覺得什麼樣的謊言可以接受？",
+        options: [
+            { text: "善意的謊言", personality: "實用主義", percentage: 85 },
+            { text: "保護別人的謊言", personality: "守護者", percentage: 79 },
+            { text: "所有謊言都不行", personality: "真實至上", percentage: 62 },
+            { text: "對我有利的謊言", personality: "自私鬼", percentage: 51 }
+        ],
+        tone: "funny"
+    },
+    {
+        question: "如果愛情和麵包只能選一個？",
+        options: [
+            { text: "愛情", personality: "浪漫傻瓜", percentage: 67 },
+            { text: "麵包", personality: "現實主義者", percentage: 74 },
+            { text: "都要", personality: "貪心鬼", percentage: 88 },
+            { text: "都不要", personality: "厭世代表", percentage: 45 }
+        ],
+        tone: "love"
+    },
+    {
+        question: "你最怕別人發現你的什麼？",
+        options: [
+            { text: "真實個性", personality: "偽裝大師", percentage: 81 },
+            { text: "黑歷史", personality: "過往逃避者", percentage: 76 },
+            { text: "真實想法", personality: "偽善者", percentage: 69 },
+            { text: "都不怕", personality: "坦蕩蕩之人", percentage: 92 }
+        ],
+        tone: "dark"
+    },
+    {
+        question: "如果可以跟任何人換24小時人生？",
+        options: [
+            { text: "明星", personality: "追星族", percentage: 68 },
+            { text: "首富", personality: "拜金主義", percentage: 77 },
+            { text: "愛人", personality: "同理心爆棚", percentage: 84 },
+            { text: "不想換", personality: "知足常樂", percentage: 91 }
+        ],
+        tone: "funny"
+    },
+    {
+        question: "你覺得什麼是真愛？",
+        options: [
+            { text: "願意為對方改變", personality: "犧牲派", percentage: 72 },
+            { text: "互相理解包容", personality: "成熟戀愛觀", percentage: 94 },
+            { text: "激情不減", personality: "熱戀永恆派", percentage: 61 },
+            { text: "不存在真愛", personality: "愛情虛無主義", percentage: 48 }
+        ],
+        tone: "love"
+    },
+    {
+        question: "如果只剩一年生命，你最想做什麼？",
+        options: [
+            { text: "環遊世界", personality: "冒險家", percentage: 83 },
+            { text: "陪伴家人", personality: "家庭至上", percentage: 90 },
+            { text: "瘋狂賺錢", personality: "執著者", percentage: 56 },
+            { text: "躺平等死", personality: "佛系青年", percentage: 67 }
+        ],
+        tone: "dark"
+    },
+    {
+        question: "你最受不了另一半的什麼行為？",
+        options: [
+            { text: "說謊", personality: "誠實至上派", percentage: 88 },
+            { text: "冷暴力", personality: "溫暖渴望者", percentage: 91 },
+            { text: "不回訊息", personality: "秒回強迫症", percentage: 74 },
+            { text: "翻舊帳", personality: "活在當下派", percentage: 79 }
+        ],
+        tone: "love"
+    },
+    {
+        question: "如果可以消除世界上的一件事？",
+        options: [
+            { text: "戰爭", personality: "和平使者", percentage: 85 },
+            { text: "貧窮", personality: "人道主義者", percentage: 82 },
+            { text: "疾病", personality: "生命守護者", percentage: 87 },
+            { text: "我的黑歷史", personality: "自我中心", percentage: 63 }
+        ],
+        tone: "funny"
+    },
+    {
+        question: "你覺得背叛你的人應該？",
+        options: [
+            { text: "原諒但不來往", personality: "理性成熟派", percentage: 86 },
+            { text: "報復回去", personality: "以牙還牙", percentage: 71 },
+            { text: "完全原諒", personality: "聖人體質", percentage: 52 },
+            { text: "記恨一輩子", personality: "仇恨收藏家", percentage: 64 }
+        ],
+        tone: "dark"
+    },
+    {
+        question: "如果能讀取一個人的全部記憶，你最想讀誰的？",
+        options: [
+            { text: "父母", personality: "孝順之人", percentage: 78 },
+            { text: "伴侶", personality: "信任缺乏者", percentage: 69 },
+            { text: "自己", personality: "自我探索者", percentage: 91 },
+            { text: "仇人", personality: "復仇策劃師", percentage: 57 }
+        ],
+        tone: "funny"
+    },
+    {
+        question: "你認為什麼是成功？",
+        options: [
+            { text: "財富自由", personality: "金錢至上", percentage: 73 },
+            { text: "家庭幸福", personality: "溫情主義", percentage: 88 },
+            { text: "實現夢想", personality: "理想主義者", percentage: 85 },
+            { text: "內心平靜", personality: "佛系哲學家", percentage: 92 }
+        ],
+        tone: "love"
+    },
+    {
+        question: "如果有人在背後說你壞話，你會？",
+        options: [
+            { text: "直接對質", personality: "正面硬剛", percentage: 77 },
+            { text: "假裝不知道", personality: "隱忍派", percentage: 64 },
+            { text: "也說對方壞話", personality: "互相傷害", percentage: 58 },
+            { text: "不在乎", personality: "大氣之人", percentage: 91 }
+        ],
+        tone: "dark"
     }
 ];
 
@@ -381,5 +591,40 @@ const achievements = [
         title: "懶惰之王",
         description: "10 次讓倒數計時自動選擇",
         condition: "lazy_king_10"
+    },
+    {
+        id: "streaker",
+        icon: "🔥",
+        title: "連擊王",
+        description: "連續 5 次獲得 90% 以上",
+        condition: "streaker_5"
+    },
+    {
+        id: "master",
+        icon: "🎓",
+        title: "測驗大師",
+        description: "回答 100 題",
+        condition: "master_100"
+    },
+    {
+        id: "dark_master",
+        icon: "😈",
+        title: "暗黑大師",
+        description: "選擇 20 題暗黑題目",
+        condition: "all_dark_20"
+    },
+    {
+        id: "love_master",
+        icon: "💖",
+        title: "戀愛大師",
+        description: "選擇 25 題戀愛題目",
+        condition: "all_love_25"
+    },
+    {
+        id: "funny_legend",
+        icon: "🎭",
+        title: "搞笑傳奇",
+        description: "選擇 25 題搞笑題目",
+        condition: "all_funny_25"
     }
 ];
