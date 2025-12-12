@@ -1,69 +1,51 @@
+let currentTestType = ''; // 'wealth' or 'investor'
 let currentQuestionIndex = 0;
 let answeredCount = 0;
-let progressTimer;
-let progressWidth = 0;
-let clickTimes = [];
-let userStats = {
-    fastClicks: 0,
-    darkChoices: 0,
-    loveChoices: 0,
-    funnyChoices: 0,
-    perfectScores: 0,
-    lowScores: 0,
-    sameOptionStreak: 0,
-    lastOptionIndex: -1,
-    totalAnswers: 0,
-    quickAnswers: 0,
-    timeoutAnswers: 0,
-    consecutiveCorrect: 0,
-    highScoreStreak: 0
-};
-
-let unlockedAchievements = JSON.parse(localStorage.getItem('achievements')) || [];
-
-// 初始化
-window.addEventListener('DOMContentLoaded', () => {
-    updateAchievementsPreview();
-});
-
-function updateAchievementsPreview() {
-    const preview = document.getElementById('achievementsPreview');
-    if (!preview) return;
-
-    preview.innerHTML = '';
-    const unlocked = unlockedAchievements.slice(0, 5);
-    unlocked.forEach(id => {
-        const ach = achievements.find(a => a.id === id);
-        if (ach) {
-            const pill = document.createElement('span');
-            pill.className = 'ach-pill';
-            pill.textContent = ach.icon + ' ' + ach.title;
-            preview.appendChild(pill);
-        }
-    });
-}
+let totalScore = 0;
+let typeScores = {}; // 用於投資名人類型計分
 
 function hideAll() {
     document.getElementById('homeView').classList.add('hide');
     document.getElementById('gameView').classList.add('hide');
     document.getElementById('resultView').classList.add('hide');
-    document.getElementById('achievementView').classList.add('hide');
 }
 
 function showView(viewId) {
     hideAll();
     document.getElementById(viewId).classList.remove('hide');
+
+    // 控制首頁按鈕顯示
+    const homeButton = document.getElementById('homeButton');
+    if (viewId === 'homeView') {
+        homeButton.style.display = 'none';
+    } else {
+        homeButton.style.display = 'block';
+    }
+}
+
+function startWealthTest() {
+    currentTestType = 'wealth';
+    startGame();
+}
+
+function startInvestorTest() {
+    currentTestType = 'investor';
+    startGame();
 }
 
 function startGame() {
     showView('gameView');
     currentQuestionIndex = 0;
     answeredCount = 0;
-    shuffleQuestions();
+    totalScore = 0;
+    typeScores = {};
+
+    const questions = currentTestType === 'wealth' ? wealthLevelQuestions : investorTypeQuestions;
+    shuffleQuestions(questions);
     showQuestion();
 }
 
-function shuffleQuestions() {
+function shuffleQuestions(questions) {
     for (let i = questions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [questions[i], questions[j]] = [questions[j], questions[i]];
@@ -71,9 +53,11 @@ function shuffleQuestions() {
 }
 
 function showQuestion() {
+    const questions = currentTestType === 'wealth' ? wealthLevelQuestions : investorTypeQuestions;
     const question = questions[currentQuestionIndex];
 
-    document.getElementById('qcounter').textContent = `${answeredCount + 1} / ∞`;
+    // 更新進度顯示（不再顯示計時條）
+    document.getElementById('qcounter').textContent = `${answeredCount + 1} / ${questions.length}`;
 
     const questionText = document.getElementById('questionText');
     questionText.style.transition = 'all 0.3s ease';
@@ -84,70 +68,24 @@ function showQuestion() {
         questionText.style.opacity = '1';
     }, 100);
 
+    // 隱藏類型徽章
     const toneBadge = document.getElementById('toneBadge');
-    toneBadge.className = 'tone-badge tone-' + question.tone;
-    const toneLabels = { funny: '😂 搞笑', love: '💕 戀愛', dark: '🌑 暗黑' };
-    toneBadge.textContent = toneLabels[question.tone];
+    toneBadge.style.display = 'none';
 
     const optionsContainer = document.getElementById('optionsContainer');
     optionsContainer.innerHTML = '';
 
     question.options.forEach((option, index) => {
         const btn = document.createElement('button');
-        btn.className = 'option-btn';
+        btn.className = 'pure-button option-btn';
         btn.textContent = option.text;
         btn.onclick = () => selectOption(index);
         optionsContainer.appendChild(btn);
     });
-
-    startProgressTimer();
-}
-
-function startProgressTimer() {
-    progressWidth = 100;
-    const progressFill = document.getElementById('timerFill');
-    progressFill.style.width = '100%';
-
-    clearInterval(progressTimer);
-
-    const startTime = Date.now();
-    const duration = 3000;
-
-    progressTimer = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const remaining = duration - elapsed;
-
-        if (remaining <= 0) {
-            clearInterval(progressTimer);
-            autoSelectOption();
-        } else {
-            progressWidth = (remaining / duration) * 100;
-            progressFill.style.width = progressWidth + '%';
-        }
-    }, 10);
-}
-
-function autoSelectOption() {
-    const randomIndex = Math.floor(Math.random() * 4);
-    selectOption(randomIndex);
-    userStats.timeoutAnswers++;
 }
 
 function selectOption(index) {
-    clearInterval(progressTimer);
-
-    const clickTime = Date.now();
-    clickTimes.push(clickTime);
-
-    if (clickTimes.length > 1) {
-        const timeDiff = clickTime - clickTimes[clickTimes.length - 2];
-        if (timeDiff < 500) {
-            userStats.fastClicks++;
-        }
-    } else {
-        userStats.quickAnswers++;
-    }
-
+    const questions = currentTestType === 'wealth' ? wealthLevelQuestions : investorTypeQuestions;
     const question = questions[currentQuestionIndex];
     const selectedOption = question.options[index];
 
@@ -155,232 +93,311 @@ function selectOption(index) {
     buttons.forEach(btn => btn.disabled = true);
     buttons[index].classList.add('selected');
 
-    // 顯示快速反饋
-    showQuickFeedback(selectedOption);
-
-    if (question.tone === 'dark') userStats.darkChoices++;
-    if (question.tone === 'love') userStats.loveChoices++;
-    if (question.tone === 'funny') userStats.funnyChoices++;
-
-    if (selectedOption.percentage >= 90) {
-        userStats.perfectScores++;
-        userStats.highScoreStreak++;
+    // 計分
+    if (currentTestType === 'wealth') {
+        totalScore += selectedOption.score;
     } else {
-        userStats.highScoreStreak = 0;
+        // 投資名人類型計分
+        const type = selectedOption.type;
+        typeScores[type] = (typeScores[type] || 0) + 1;
     }
 
-    if (selectedOption.percentage <= 20) userStats.lowScores++;
-
-    if (index === userStats.lastOptionIndex) {
-        userStats.sameOptionStreak++;
-    } else {
-        userStats.sameOptionStreak = 0;
-    }
-    userStats.lastOptionIndex = index;
-
-    userStats.totalAnswers++;
-
-    checkAchievements();
-
-    // 直接進入下一題，不顯示結果畫面
+    // 直接進入下一題或顯示結果
     setTimeout(() => {
-        nextQuestion();
-    }, 800);
+        answeredCount++;
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex >= questions.length) {
+            // 測驗完成，顯示結果
+            showFinalResult();
+        } else {
+            // 下一題
+            showQuestion();
+        }
+    }, 300);
 }
 
 function showQuickFeedback(option) {
-    // 在題目文字區域顯示快速反饋
     const questionText = document.getElementById('questionText');
 
     questionText.style.transition = 'all 0.3s ease';
     questionText.style.opacity = '0';
 
     setTimeout(() => {
-        questionText.innerHTML = `<div style="text-align:center">
-            <div style="font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">${option.personality}</div>
-            <div style="font-size:48px;font-weight:900">${option.percentage}%</div>
-        </div>`;
+        if (currentTestType === 'wealth') {
+            questionText.innerHTML = `<div style="text-align:center">
+                <div style="font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">${option.level}</div>
+                <div style="font-size:48px;font-weight:900">✓</div>
+            </div>`;
+        } else {
+            questionText.innerHTML = `<div style="text-align:center">
+                <div style="font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">${option.type}型</div>
+                <div style="font-size:48px;font-weight:900">✓</div>
+            </div>`;
+        }
         questionText.style.opacity = '1';
     }, 300);
 }
 
-function showResult(option) {
+function showFinalResult() {
     showView('resultView');
 
-    document.getElementById('resultPersonality').textContent = option.personality;
-    document.getElementById('resultPercentage').textContent = option.percentage + '%';
-    document.getElementById('resultDescription').textContent = getRandomDescription(option.percentage);
+    const resultCard = document.getElementById('resultCard');
 
-    // 顯示徽章
-    const badges = document.getElementById('resultBadges');
-    badges.innerHTML = '';
-    if (option.percentage >= 90) {
-        badges.innerHTML = '<span class="ach-pill">🔥 完美!</span>';
-    } else if (option.percentage >= 70) {
-        badges.innerHTML = '<span class="ach-pill">✨ 很準!</span>';
+    if (currentTestType === 'wealth') {
+        // 計算財富等級
+        const questions = wealthLevelQuestions;
+        const maxScore = questions.length * 4; // 每題最高4分
+        const percentage = Math.round((totalScore / maxScore) * 100);
+
+        // 找出對應的等級
+        let level = null;
+        for (const value of Object.values(wealthLevels)) {
+            if (percentage >= value.range[0] && percentage <= value.range[1]) {
+                level = value;
+                break;
+            }
+        }
+
+        resultCard.innerHTML = `
+            <div style="text-align:center">
+                <div style="font-size:64px;margin-bottom:16px">${level.emoji}</div>
+                <h2 style="font-size:32px;font-weight:900;margin-bottom:8px">${level.title}</h2>
+                <div style="font-size:48px;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px">${percentage} 分</div>
+
+                <!-- 進度條 -->
+                <div style="background:rgba(255,255,255,0.05);border-radius:12px;height:24px;margin-bottom:24px;overflow:hidden;position:relative">
+                    <div style="background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;width:${percentage}%;transition:width 1s ease;border-radius:12px"></div>
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:700;color:white;text-shadow:0 2px 4px rgba(0,0,0,0.3)">財富自由進度</div>
+                </div>
+
+                <p style="font-size:16px;line-height:1.8;margin-bottom:24px;color:var(--text-secondary)">${level.description}</p>
+
+                <!-- 建議卡片 -->
+                <div style="background:var(--surface);padding:20px;border-radius:12px;margin-bottom:16px;border-left:4px solid var(--accent)">
+                    <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">💡 理財建議</div>
+                    <p style="font-size:14px;line-height:1.8;color:var(--text-secondary)">${level.advice}</p>
+                </div>
+
+                <!-- 等級對照表 -->
+                <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:12px;margin-bottom:24px">
+                    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">財富等級對照表</div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);gap:4px">
+                        <div style="text-align:center;flex:1;${percentage <= 20 ? 'opacity:1;color:var(--accent)' : 'opacity:0.4'}">
+                            <div style="margin-bottom:4px">😭</div>
+                            <div>吃土</div>
+                        </div>
+                        <div style="text-align:center;flex:1;${percentage > 20 && percentage <= 40 ? 'opacity:1;color:var(--accent)' : 'opacity:0.4'}">
+                            <div style="margin-bottom:4px">💸</div>
+                            <div>月光</div>
+                        </div>
+                        <div style="text-align:center;flex:1;${percentage > 40 && percentage <= 60 ? 'opacity:1;color:var(--accent)' : 'opacity:0.4'}">
+                            <div style="margin-bottom:4px">💰</div>
+                            <div>小資</div>
+                        </div>
+                        <div style="text-align:center;flex:1;${percentage > 60 && percentage <= 80 ? 'opacity:1;color:var(--accent)' : 'opacity:0.4'}">
+                            <div style="margin-bottom:4px">📈</div>
+                            <div>高手</div>
+                        </div>
+                        <div style="text-align:center;flex:1;${percentage > 80 ? 'opacity:1;color:var(--accent)' : 'opacity:0.4'}">
+                            <div style="margin-bottom:4px">🏝️</div>
+                            <div>自由</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="pure-button btn primary" onclick="showView('homeView')">返回首頁</button>
+                    <button class="pure-button btn" onclick="startWealthTest()">再測一次</button>
+                    <button class="pure-button btn" onclick="startInvestorTest()">測投資名人</button>
+                </div>
+
+                <!-- 分享按鈕 -->
+                <div class="share-section" style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1)">
+                    <div style="text-align:center;margin-bottom:12px;color:var(--muted);font-size:14px">分享你的結果</div>
+                    <div style="display:flex;gap:8px;justify-content:center">
+                        <button class="pure-button share-btn" onclick="shareToIG()">📸 分享到 IG</button>
+                        <button class="pure-button share-btn" onclick="copyLink()">🔗 複製連結</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // 找出最多的投資名人類型
+        let maxCount = 0;
+        let investorType = '';
+        for (const [type, count] of Object.entries(typeScores)) {
+            if (count > maxCount) {
+                maxCount = count;
+                investorType = type;
+            }
+        }
+
+        const investor = investorTypes[investorType];
+
+        const matchPercentage = Math.round((maxCount / investorTypeQuestions.length) * 100);
+
+        resultCard.innerHTML = `
+            <div style="text-align:center">
+                <div style="font-size:64px;margin-bottom:16px">${investor.emoji}</div>
+                <h2 style="font-size:32px;font-weight:900;margin-bottom:8px">${investor.title}</h2>
+                <div style="font-size:24px;font-weight:700;color:var(--accent);margin-bottom:16px">匹配度：${matchPercentage}%</div>
+
+                <!-- 匹配度進度條 -->
+                <div style="background:rgba(255,255,255,0.05);border-radius:12px;height:24px;margin-bottom:24px;overflow:hidden;position:relative">
+                    <div style="background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;width:${matchPercentage}%;transition:width 1s ease;border-radius:12px"></div>
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:700;color:white;text-shadow:0 2px 4px rgba(0,0,0,0.3)">投資風格相似度</div>
+                </div>
+
+                <p style="font-size:16px;line-height:1.8;margin-bottom:24px;color:var(--text-secondary)">${investor.description}</p>
+
+                <!-- 投資風格卡片 -->
+                <div style="background:var(--surface);padding:20px;border-radius:12px;margin-bottom:16px;border-left:4px solid var(--accent)">
+                    <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">📊 投資風格分析</div>
+                    <p style="font-size:14px;line-height:1.8;color:var(--text-secondary)">${investor.style}</p>
+                </div>
+
+                <!-- 經典語錄 -->
+                <div style="background:rgba(255,255,255,0.02);padding:20px;border-radius:12px;margin-bottom:24px;border-left:4px solid var(--accent2)">
+                    <div style="font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:8px">💬 經典語錄</div>
+                    <p style="font-size:14px;line-height:1.8;font-style:italic;color:var(--text-secondary)">${investor.quote}</p>
+                </div>
+
+                <!-- 所有類型對照 -->
+                <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:12px;margin-bottom:24px">
+                    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">投資名人類型</div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11px">
+                        ${['巴菲特', '索羅斯', '馬斯克', '彼得林奇', '孫正義', '雷達里奧'].map(type => `
+                            <div style="text-align:center;padding:8px;border-radius:8px;${investorType === type ? 'background:var(--accent);color:white' : 'background:rgba(255,255,255,0.05);color:var(--muted)'}">
+                                ${investorTypes[type]?.emoji || ''}<br>${type}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="pure-button btn primary" onclick="showView('homeView')">返回首頁</button>
+                    <button class="pure-button btn" onclick="startInvestorTest()">再測一次</button>
+                    <button class="pure-button btn" onclick="startWealthTest()">測財富等級</button>
+                </div>
+
+                <!-- 分享按鈕 -->
+                <div class="share-section" style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1)">
+                    <div style="text-align:center;margin-bottom:12px;color:var(--muted);font-size:14px">分享你的結果</div>
+                    <div style="display:flex;gap:8px;justify-content:center">
+                        <button class="pure-button share-btn" onclick="shareToIG()">📸 分享到 IG</button>
+                        <button class="pure-button share-btn" onclick="copyLink()">🔗 複製連結</button>
+                    </div>
+                </div>
+            </div>
+        `;
     }
-}
-
-function getRandomDescription(percentage) {
-    const descriptions = {
-        high: [
-            '你的直覺準到可怕，建議去買樂透',
-            '這個選擇完美詮釋了你的內心',
-            '恭喜你，成功暴露了真實的自己',
-            '你的潛意識正在對你微笑',
-            '這就是你內心最真實的聲音',
-            '你對自己的了解程度：滿分'
-        ],
-        medium: [
-            '還不錯，但你內心還有更多秘密',
-            '你正在通往自我認識的路上',
-            '這個答案透露了一些你的小心思',
-            '你的選擇很有意思呢',
-            '你在逃避什麼嗎？',
-            '有點意思，繼續探索吧'
-        ],
-        low: [
-            '你可能需要重新認識一下自己',
-            '這個選擇...很特別',
-            '你的潛意識可能在開玩笑',
-            '有時候逃避也是一種選擇',
-            '勇氣可嘉，但方向好像不太對',
-            '你是不是隨便選的？'
-        ]
-    };
-
-    let category = 'medium';
-    if (percentage >= 70) category = 'high';
-    if (percentage <= 30) category = 'low';
-
-    const list = descriptions[category];
-    return list[Math.floor(Math.random() * list.length)];
 }
 
 function nextQuestion() {
     answeredCount++;
     currentQuestionIndex++;
 
+    const questions = currentTestType === 'wealth' ? wealthLevelQuestions : investorTypeQuestions;
+
     if (currentQuestionIndex >= questions.length) {
         currentQuestionIndex = 0;
-        shuffleQuestions();
+        shuffleQuestions(questions);
     }
 
     showQuestion();
 }
 
-function showAchievements() {
-    showView('achievementView');
+// 分享到 IG
+async function shareToIG() {
+    // 顯示載入提示
+    const originalBtn = event.target;
+    const originalText = originalBtn.textContent;
+    originalBtn.textContent = '📸 製作中...';
+    originalBtn.disabled = true;
 
-    const list = document.getElementById('achievementsList');
-    list.innerHTML = '';
+    try {
+        // 取得結果卡片元素
+        const resultCard = document.getElementById('resultCard');
 
-    achievements.forEach(achievement => {
-        const item = document.createElement('div');
-        item.className = 'achievement-item';
+        // 使用 html2canvas 截圖
+        const canvas = await html2canvas(resultCard, {
+            backgroundColor: '#0b1220',
+            scale: 2, // 提高解析度
+            logging: false,
+            useCORS: true
+        });
 
-        if (unlockedAchievements.includes(achievement.id)) {
-            item.classList.add('unlocked');
+        // 將 canvas 轉成 blob
+        canvas.toBlob(async (blob) => {
+            // 準備分享的檔案
+            const file = new File([blob], '財富自由測驗結果.png', { type: 'image/png' });
+
+            // 檢查是否支援 Web Share API
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                // 使用 Web Share API 分享
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: '財富自由測驗結果',
+                        text: '我剛測完財富自由測驗！快來測測你的財富力 💰📈'
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.log('分享取消或失敗', err);
+                    }
+                }
+            } else {
+                // 不支援 Web Share API，下載圖片
+                const url = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = '財富自由測驗結果.png';
+                link.href = url;
+                link.click();
+
+                // 提示用戶
+                setTimeout(() => {
+                    alert('📸 圖片已下載！\n請到相簿找到圖片，然後上傳到 IG 限時動態～');
+                }, 500);
+            }
+
+            // 恢復按鈕
+            originalBtn.textContent = originalText;
+            originalBtn.disabled = false;
+        }, 'image/png');
+
+    } catch (error) {
+        console.error('截圖失敗:', error);
+        alert('❌ 截圖失敗，請稍後再試');
+
+        // 恢復按鈕
+        originalBtn.textContent = originalText;
+        originalBtn.disabled = false;
+    }
+}
+
+// 複製連結
+function copyLink() {
+    const url = window.location.href;
+
+    // 使用 Clipboard API 複製連結
+    navigator.clipboard.writeText(url).then(() => {
+        // 複製成功，顯示提示
+        alert('✅ 連結已複製！快分享給朋友吧～');
+    }).catch(() => {
+        // 如果 Clipboard API 不支援，使用舊方法
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert('✅ 連結已複製！快分享給朋友吧～');
+        } catch (err) {
+            alert('❌ 複製失敗，請手動複製網址');
         }
-
-        item.innerHTML = `
-            <div class="icon">${achievement.icon}</div>
-            <div class="info">
-                <div class="title">${achievement.title}</div>
-                <div class="desc">${achievement.description}</div>
-            </div>
-        `;
-
-        list.appendChild(item);
+        document.body.removeChild(textArea);
     });
-}
-
-function hideAchievements() {
-    showView('homeView');
-}
-
-function checkAchievements() {
-    achievements.forEach(achievement => {
-        if (unlockedAchievements.includes(achievement.id)) return;
-
-        let unlocked = false;
-
-        switch (achievement.condition) {
-            case 'fast_click_20':
-                if (userStats.fastClicks >= 20) unlocked = true;
-                break;
-            case 'dark_lover_10':
-                if (userStats.darkChoices >= 10) unlocked = true;
-                break;
-            case 'love_expert_15':
-                if (userStats.loveChoices >= 15) unlocked = true;
-                break;
-            case 'funny_master_15':
-                if (userStats.funnyChoices >= 15) unlocked = true;
-                break;
-            case 'perfect_5':
-                if (userStats.perfectScores >= 5) unlocked = true;
-                break;
-            case 'brave_soul_5':
-                if (userStats.lowScores >= 5) unlocked = true;
-                break;
-            case 'robot_mode_5':
-                if (userStats.sameOptionStreak >= 5) unlocked = true;
-                break;
-            case 'explorer_50':
-                if (userStats.totalAnswers >= 50) unlocked = true;
-                break;
-            case 'speed_demon_10':
-                if (userStats.quickAnswers >= 10) unlocked = true;
-                break;
-            case 'lazy_king_10':
-                if (userStats.timeoutAnswers >= 10) unlocked = true;
-                break;
-            case 'streaker_5':
-                if (userStats.highScoreStreak >= 5) unlocked = true;
-                break;
-            case 'master_100':
-                if (userStats.totalAnswers >= 100) unlocked = true;
-                break;
-            case 'all_dark_20':
-                if (userStats.darkChoices >= 20) unlocked = true;
-                break;
-            case 'all_love_25':
-                if (userStats.loveChoices >= 25) unlocked = true;
-                break;
-            case 'all_funny_25':
-                if (userStats.funnyChoices >= 25) unlocked = true;
-                break;
-        }
-
-        if (unlocked) {
-            unlockedAchievements.push(achievement.id);
-            localStorage.setItem('achievements', JSON.stringify(unlockedAchievements));
-            showAchievementPopup(achievement);
-            updateAchievementsPreview();
-        }
-    });
-}
-
-function showAchievementPopup(achievement) {
-    const popup = document.getElementById('achievementPopup');
-    document.getElementById('popupTitle').textContent = achievement.title;
-    document.getElementById('popupDescription').textContent = achievement.description;
-
-    popup.classList.add('show');
-
-    setTimeout(() => {
-        popup.classList.remove('show');
-    }, 3000);
-}
-
-function shareToIG() {
-    const text = encodeURIComponent(`我在心理測驗中解鎖了 ${unlockedAchievements.length} 個成就！你也來試試吧！`);
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.instagram.com/create/story/?url=${url}&text=${text}`, '_blank');
-}
-
-function shareToLine() {
-    const text = encodeURIComponent(`我在心理測驗中解鎖了 ${unlockedAchievements.length} 個成就！你也來試試吧！ ${window.location.href}`);
-    window.open(`https://line.me/R/share?text=${text}`, '_blank');
 }
